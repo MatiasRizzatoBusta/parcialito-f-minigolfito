@@ -50,4 +50,6 @@ calculoPrecision funcion = funcion.precisionJugador
 
 palos = [putter,madera,hierros]
 ---------------------------- Punto 2 ----------------------------
-golpe :: Palos->Jugador->Tiro
+golpe :: Palos->Int->Jugador->Tiro
+golpe palo n jugador = palo n jugador
+
