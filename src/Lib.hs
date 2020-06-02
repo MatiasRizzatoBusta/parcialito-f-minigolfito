@@ -34,11 +34,12 @@ mayorSegun f a b
   | otherwise = b
 
 ---------------------------- Punto 1 ----------------------------
-putter :: Int->Jugador->Tiro--los hago asi pq para hacer la lista de funciones todos tienen que tener la misma forma
+type Palos = Int->Jugador->Tiro
+putter :: Palos--los hago asi pq para hacer la lista de funciones todos tienen que tener la misma forma
 putter _ jugador = UnTiro{velocidad=10,precision=calculoPrecision (*2) (habilidad jugador),altura= 0}
-madera :: Int->Jugador->Tiro
+madera :: Palos
 madera _ jugador = UnTiro{velocidad=100,precision=calculoPrecision (`div` 2) (habilidad jugador),altura= 5}
-hierros :: Int->Jugador->Tiro
+hierros :: Palos
 hierros n jugador = UnTiro{velocidad=calculoVelocidad n (habilidad jugador),precision=calculoPrecision (`div` n) (habilidad jugador),altura= max 0 (n-3)}
 
 calculoVelocidad :: Int->Habilidad->Int
@@ -48,5 +49,5 @@ calculoPrecision :: (Int->Int)->Habilidad->Int
 calculoPrecision funcion = funcion.precisionJugador
 
 palos = [putter,madera,hierros]
-
 ---------------------------- Punto 2 ----------------------------
+golpe :: Palos->Jugador->Tiro
