@@ -52,4 +52,27 @@ palos = [putter,madera,hierros]
 ---------------------------- Punto 2 ----------------------------
 golpe :: Palos->Int->Jugador->Tiro
 golpe palo n jugador = palo n jugador
+---------------------------- Punto 3 ----------------------------
+type Efecto = Tiro->Obstaculo->Tiro
 
+data Obstaculo =UnObstaculo{
+    nombreObstaculo::String,
+    largo :: Int
+}deriving (Show,Eq)
+
+superaObstaculo :: Tiro->Obstaculo->Tiro
+superaObstaculo tiro obstaculo |loSupera tiro (nombreObstaculo obstaculo) = efecto tiro obstaculo
+                               |otherwise= tiro{velocidad=0,precision=0,altura=0}
+
+loSupera :: Tiro->String->Bool
+loSupera tiro "tunel con rampita" = (precision tiro)> 90 && (altura tiro)== 0
+loSupera tiro "laguna" = (velocidad tiro)>80 && estaEntreValores (altura tiro) 5 1 
+loSupera tiro "hoyo" = estaEntreValores (velocidad tiro) 20 5 && (altura tiro) == 0
+
+estaEntreValores :: Int->Int->Int->Bool
+estaEntreValores caracteristica max min = caracteristica>min && caracteristica<max
+
+efecto :: Efecto
+efecto tiro (UnObstaculo "tunel con rampita" _ ) = tiro{velocidad=(velocidad tiro)*2,precision= 100,altura=0}
+efecto tiro (UnObstaculo "laguna" largo ) = tiro{altura= (altura tiro) `div` largo}
+efecto tiro (UnObstaculo "hoyo" _ ) = tiro{velocidad=0,precision=0,altura=0}
