@@ -47,63 +47,76 @@ palos = [putter,madera] ++ map hierros [1..10]--esto me da una lista con todos l
 golpe :: Jugador->Palos->Tiro
 golpe jugador palo = palo (habilidad jugador)
 ---------------------------- Punto 3 ----------------------------
-type Efecto = Tiro->Obstaculo->Tiro
+type Efecto = Tiro->Tiro
 --no uso pattern matching pq puede habe mas obstaculos en el futuro y voy a tener que cambiar toda la funcion.
 --planto los obstaculos como funciones.
 
+tiroDetenido = UnTiro 0 0 0
+
 data Obstaculo =UnObstaculo{
-    nombreObstaculo::String,
-    largo :: Int
-}deriving (Show,Eq)
+    puedeSuperar ::Tiro->Bool, --Evito hardcodearlas para cada tipo de obstaculo entonces ya me vienen las que usa cada uno en el data
+    efecto :: Efecto
+}deriving (Show)
 
-hoyo = UnObstaculo "hoyo" 0
-tunel = UnObstaculo "tunel con rampita" 0
-laguna = UnObstaculo "laguna" 4
+superaObstaculo :: Obstaculo->Tiro->Tiro
+superaObstaculo obstaculo tiro |(puedeSuperar obstaculo) tiro  = (efecto obstaculo) tiro --toma a la primera funcion del obstaculo
+                               |otherwise = tiroDetenido
 
+tunelConRampita :: Obstaculo
+tunelConRampita = UnObstaculo superaTunelConRampita efectoRampita
 
-superaObstaculo :: Tiro->Obstaculo->Tiro
-superaObstaculo tiro obstaculo  |loSupera (nombreObstaculo obstaculo) tiro  = efecto tiro obstaculo
-                                |otherwise= tiro{velocidad=0,precision=0,altura=0}
+laguna :: Int->Obstaculo
+laguna largo = UnObstaculo superaLaguna (efectoLaguna largo)
 
-loSupera :: String->Tiro->Bool
-loSupera "tunel con rampita" tiro  = (precision tiro)> 90 && (altura tiro)== 0
-loSupera "laguna" tiro  = (velocidad tiro)>80 && estaEntreValores (altura tiro) 5 1 
-loSupera "hoyo" tiro  = estaEntreValores (velocidad tiro) 20 5 && (altura tiro) == 0
+hoyo :: Obstaculo
+hoyo = UnObstaculo superaHoyo efectoHoyo
 
-estaEntreValores :: Int->Int->Int->Bool
-estaEntreValores caracteristica max min = caracteristica>min && caracteristica<max
+superaTunelConRampita :: Tiro->Bool
+superaTunelConRampita tiro  = (precision tiro) > 90 && (altura tiro) == 0
 
-efecto :: Efecto
-efecto tiro (UnObstaculo "tunel con rampita" _ ) = tiro{velocidad=(velocidad tiro)*2,precision= 100,altura=0}
-efecto tiro (UnObstaculo "laguna" largo ) = tiro{altura= (altura tiro) `div` largo}
-efecto tiro (UnObstaculo "hoyo" _ ) = tiro{velocidad=0,precision=0,altura=0}
+superaLaguna ::Tiro->Bool
+superaLaguna tiro = (velocidad tiro) > 80 && between 1 5 (altura tiro) 
+
+superaHoyo :: Tiro->Bool
+superaHoyo tiro = (between 5 20.velocidad) tiro && (altura tiro) == 0 && (precision tiro) > 95
+
+efectoRampita :: Efecto
+efectoRampita tiro = tiro{velocidad=(velocidad tiro)*2,precision= 100,altura=0}
+
+efectoLaguna :: Int->Efecto
+efectoLaguna largo tiro = tiro{altura= (altura tiro) `div` largo}
+
+efectoHoyo :: Efecto
+efectoHoyo tiro = tiroDetenido
 ---------------------------- Punto 4 ----------------------------
-palosUtiles :: Obstaculo->Jugador->[Palos]
-palosUtiles obstaculo jugador = filter (esPaloUtil jugador obstaculo) palos --anda pero como son funciones no los muestra
+palosUtiles :: Jugador->Obstaculo->[Palos]
+palosUtiles jugador obstaculo  = filter (esPaloUtil jugador obstaculo) palos 
 
 esPaloUtil :: Jugador->Obstaculo->Palos->Bool
-esPaloUtil jugador obstaculo = (loSupera (nombreObstaculo obstaculo)).(golpe jugador 5)--revisar que hacer con N
+esPaloUtil jugador obstaculo = (puedeSuperar obstaculo).(golpe jugador)
 
-campo = [tunel,tunel,hoyo]
 tiroPrueba = UnTiro 10 95 0
 
-cuantosSuperaConsecutivamente :: Tiro->[Obstaculo]->Int
-cuantosSuperaConsecutivamente tiro listaObstaculos  = (length.(armoNuevaLista tiro)) listaObstaculos
-
-armoNuevaLista :: Tiro->[Obstaculo]->[Obstaculo]
-armoNuevaLista tiro listaObstaculos = takeWhile ((==False).(criterioTiro tiro)) listaObstaculos
-
-criterioTiro :: Tiro->Obstaculo->Bool
-criterioTiro tiro = esTiroNulo.(superaObstaculo tiro)
-
-esTiroNulo :: Tiro->Bool
-esTiroNulo (UnTiro velocidad precision altura) = velocidad == 0 && precision == 0 && altura == 0
+cuantosSuperaConsecutivamente :: Tiro->[Obstaculo]->Int --sol de forma recursiva
+cuantosSuperaConsecutivamente tiro (obstaculo:obstaculos)  |(puedeSuperar obstaculo) tiro = cuantosSuperaConsecutivamente ((efecto obstaculo) tiro) obstaculos
 
 paloMasUtil :: Jugador->[Obstaculo]->[Palos]->Palos
 paloMasUtil jugador listaObstaculos listap = foldl1 (elMejor jugador listaObstaculos) listap
 
 elMejor :: Jugador->[Obstaculo]->Palos->Palos->Palos
-elMejor jugador listaObstaculos  p1 p2  |(cuantosSuperaConsecutivamente (golpe jugador 0 p1) listaObstaculos) >= (cuantosSuperaConsecutivamente (golpe jugador 0 p2) listaObstaculos)= p1
+elMejor jugador listaObstaculos  p1 p2  |(cuantosSuperaConsecutivamente (golpe jugador p1) listaObstaculos) >= (cuantosSuperaConsecutivamente (golpe jugador p2) listaObstaculos)= p1
                                         |otherwise = p2
+---------------------------- Punto 5 ----------------------------
+tomoJugador :: (Jugador,Puntos)->Jugador
+tomoJugador = fst
+tomoPuntos :: (Jugador,Puntos)->Puntos
+tomoPuntos = snd
 
+pierdenLaApuesta :: [(Jugador,Puntos)]->[String]
+pierdenLaApuesta puntosTorneo = (map (padre.tomoJugador).filter (not.gano tomoPuntos ) ) puntosTorneo
 
+gano :: [(Jugador,Puntos)]->(Jugador,Puntos)->Bool --tomo la lista sin el mismo jugador
+gano puntosTorneo puntosJugador =  ((comparoPuntos puntosJugador).(map tomoPuntos).filter (/= puntosJugador)) puntosTorneo
+
+comparoPuntos :: (Jugador,Puntos)->[Puntos]->Bool
+comparoPuntos jugador ptosDemas = all ((snd jugador) >) ptosDemas
