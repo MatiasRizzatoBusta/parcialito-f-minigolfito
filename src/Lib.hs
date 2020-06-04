@@ -48,6 +48,8 @@ golpe :: Jugador->Palos->Tiro
 golpe jugador palo = palo (habilidad jugador)
 ---------------------------- Punto 3 ----------------------------
 type Efecto = Tiro->Obstaculo->Tiro
+--no uso pattern matching pq puede habe mas obstaculos en el futuro y voy a tener que cambiar toda la funcion.
+--planto los obstaculos como funciones.
 
 data Obstaculo =UnObstaculo{
     nombreObstaculo::String,
