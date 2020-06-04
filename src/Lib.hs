@@ -26,13 +26,13 @@ data Tiro = UnTiro {
 type Puntos = Int
 
 ---------------------------- Punto 1 ----------------------------
-type Palos = Jugador->Tiro
+type Palos = Habilidad->Tiro
 putter :: Palos--los hago asi pq para hacer la lista de funciones todos tienen que tener la misma forma
-putter jugador = UnTiro{velocidad=10,precision=calculoPrecision (*2) (habilidad jugador),altura= 0}
+putter habilidad = UnTiro{velocidad=10,precision=calculoPrecision (*2) habilidad,altura= 0}
 madera :: Palos
-madera jugador = UnTiro{velocidad=100,precision=calculoPrecision (`div` 2) (habilidad jugador),altura= 5}
+madera habilidad= UnTiro{velocidad=100,precision=calculoPrecision (`div` 2) habilidad ,altura= 5}
 hierros :: Int->Palos --hago una funcion generica que modele a todos los hierros
-hierros n jugador = UnTiro{velocidad=calculoVelocidad n (habilidad jugador),precision=calculoPrecision (`div` n) (habilidad jugador),altura= max 0 (n-3)}
+hierros n habilidad = UnTiro{velocidad=calculoVelocidad n habilidad ,precision=calculoPrecision (`div` n) habilidad ,altura= max 0 (n-3)}
 
 calculoVelocidad :: Int->Habilidad->Int
 calculoVelocidad n  = (*n).fuerzaJugador
@@ -45,7 +45,7 @@ palos = [putter,madera] ++ map hierros [1..10]--esto me da una lista con todos l
 
 ---------------------------- Punto 2 ----------------------------
 golpe :: Jugador->Palos->Tiro
-golpe jugador palo = palo jugador 
+golpe jugador palo = palo (habilidad jugador)
 ---------------------------- Punto 3 ----------------------------
 type Efecto = Tiro->Obstaculo->Tiro
 
