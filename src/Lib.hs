@@ -113,10 +113,10 @@ tomoPuntos :: (Jugador,Puntos)->Puntos
 tomoPuntos = snd
 
 pierdenLaApuesta :: [(Jugador,Puntos)]->[String]
-pierdenLaApuesta puntosTorneo = (map (padre.tomoJugador).filter (not.gano tomoPuntos ) ) puntosTorneo
+pierdenLaApuesta puntosTorneo = (map (padre.tomoJugador).filter (gano tomoPuntos)) puntosTorneo
 
 gano :: [(Jugador,Puntos)]->(Jugador,Puntos)->Bool --tomo la lista sin el mismo jugador
-gano puntosTorneo puntosJugador =  ((comparoPuntos puntosJugador).(map tomoPuntos).filter (/= puntosJugador)) puntosTorneo
+gano puntosTorneo puntosJugador =  (not.(comparoPuntos puntosJugador).(map tomoPuntos).filter (/= puntosJugador)) puntosTorneo
 
 comparoPuntos :: (Jugador,Puntos)->[Puntos]->Bool
 comparoPuntos jugador ptosDemas = all ((snd jugador) >) ptosDemas
