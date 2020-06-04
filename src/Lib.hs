@@ -44,8 +44,8 @@ palos ::[Palos]
 palos = [putter,madera] ++ map hierros [1..10]--esto me da una lista con todos los hierros y un valor
 
 ---------------------------- Punto 2 ----------------------------
-golpe :: Jugador->Int->Palos->Tiro
-golpe jugador n palo = palo n jugador 
+golpe :: Jugador->Palos->Tiro
+golpe jugador palo = palo jugador 
 ---------------------------- Punto 3 ----------------------------
 type Efecto = Tiro->Obstaculo->Tiro
 
